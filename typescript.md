@@ -192,3 +192,130 @@ let strLength: number = (someValue as string).length
 
 JSX中只有as语法断言是允许的
 
+## 接口
+
+```typescript
+interface LabelValue {
+  label: string
+}
+
+function printLabel(labelObj: LabelValue) {
+  console.log(labelObj.label)
+}
+
+let myObj = {size: 10, label: 'size 10 object'}
+printLabel(myObj)
+```
+
+类型检查器去检查传入对象和接口，只关注这两个的外形是否一致，不关注传入对象是否实现了接口
+
+### 可选属性
+
+接口可选属性可以预定义部分属性，可选属性名字定义的后面加一个`?`符号
+
+```typescript
+interface SquareConfig {
+  color?: string;
+  width?: number;
+}
+
+function createSquare(config: SquareConfig): {color: string; area: number} {
+  let newSquare = {color: "white", area: 100};
+  if (config.color) {
+    newSquare.color = config.color;
+  }
+  if (config.width) {
+    newSquare.area = config.width * config.width;
+  }
+  return newSquare;
+}
+
+let mySquare = createSquare({color: "black"});
+```
+
+### 只读属性
+
+只读属性只能在刚刚创建的时候修改值，在属性名前用 `readonly`来指定只读属性
+
+```typescript
+interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+let p1: Point = {x: 1, y: 2}
+console.log(p1.x)
+```
+
+`ReadonlyArray<T>`是普通数组去掉可变方法的版本，即使把`ReadonlyArray`赋值给普通数组都不行（可用断言解决）
+
+```typescript
+let a: number[] = [1,2,3,4]
+let ro: ReadonlyArray<number> = a
+// ro[0] = 12 error
+// ro.push(5) error
+// ro.length = 5 error
+// a = ro error
+a = ro as number[]
+```
+
+### 额外属性检查
+
+像下面那样用可选参数定义接口，调用函数传入参数时有一个额外的属性，这个属性在js中可以通过，但是在typescript中则会额外属性检查，会报错
+
+> 错误原因：对象字面量会被特殊对待而且会经过 *额外属性检查*，当将它们赋值给变量或作为参数传递的时候。 如果一个对象字面量存在任何“目标类型”不包含的属性时，你会得到一个错误
+
+解决方式：
+
+1. 可以用类型断言解决
+2. 添加字符串索引签名（最佳方式），前提是会有不确定的额外属性出现
+3. 将对象字面量赋值给一个变量再传给函数
+
+```typescript
+interface SquareConfig{
+  color?: string;
+  width?: number
+}
+function createSquare(config: SquareConfig): {color: string, area: number} {
+  return { color: 'white', area: 100}
+}
+let mySquare = createSquare({colour: 'red', width: 100}) // 报错
+let mySquare = createSquare({colour: 'red', width: 100} as SquareConfig) // 解决方式1
+
+// 解决方式2
+interface SquareConfig{
+  color?: string;
+  width?: number
+  [propName: string]: any
+}
+
+// 解决方式3
+let squareOptions = {colour: 'red', width: 100}
+let mySquare = createSquare(squareOptions)
+```
+
+### 函数类型
+
+接口用一个签名表示函数类型，函数的参数名不需要和接口定义的名字一致
+
+```typescript
+interface SearchFunc{
+  (source: string, subString: string): boolean
+}
+let mySearch: SearchFunc = function(src: string, sub: string): boolean{
+  let result = src.search(sub)
+  return result > -1
+}
+```
+
+函数的参数会逐个检查，要求对应位置的参数类型和接口匹配。可以不指定函数的参数和返回值类型，typescript会推断出类型
+
+```typescript
+interface SearchFunc{
+  (source: string, subString: string): boolean
+}
+let mySearch: SearchFunc = function(src, sub){
+  let result = src.search(sub)
+  return result > -1
+}
+```
+
