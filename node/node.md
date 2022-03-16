@@ -188,3 +188,24 @@ eventEmitter.on('eventName', eventHandler)
 eventEmitter.emit('eventName')
 ```
 
+## fs文件系统模块
+
+`fs.readFile(path,[options],callback)`
+
+```js
+const fs = require('fs')
+fs.readFile('./11.txt', 'utf8', function(err,data){
+	console.log(err)
+	console.log(data)
+})
+```
+
+`fs.writeFile(path,[options],callback)`
+
+```js
+const fs = require('fs')
+fs.writeFile('./1.txt', 'hello Node.js', function(err){
+    console.log(err)
+})
+```
+
