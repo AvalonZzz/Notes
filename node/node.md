@@ -209,3 +209,32 @@ fs.writeFile('./1.txt', 'hello Node.js', function(err){
 })
 ```
 
+## path路径模块
+
+`path.join([...paths])`将多个参数合并为一个路径
+
+```js
+const path = require('path')
+console.log(path.join('/a', '/b/c', '../', '/d')) // \a\b\d
+
+console.log(path.join(__dirname, '/demo/1.txt')) //F:\node\path\demo\1.txt
+```
+
+`path.basename(path[, ext])`获取路径中的最后一部分
+
+```js
+const fpath = '/a/b/c/index.html'
+let fullName = path.basename(fpath)
+console.log(fullName) // index.html
+let nameWithoutExt = path.basename(fpath, '.html')
+console.log(nameWithoutExt) // index
+```
+
+`path.extname(path)`获取文件的扩展名
+
+```js
+const filepath = '/a/b/c/index.js'
+const fext = path.extname(filepath)
+console.log(fext) // .js
+```
+
