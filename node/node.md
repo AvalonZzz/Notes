@@ -238,3 +238,126 @@ const fext = path.extname(filepath)
 console.log(fext) // .js
 ```
 
+## Http模块
+
+1. 引入http模块
+2. 调用`http.createServer()`创建服务器实例
+3. 为服务器实例绑定request事件（只要有客户端请求服务器就会触发request事件）
+4. 在服务器实例上调用`listen(端口号)`方法来启动服务器
+
+```js
+const http = require('http')
+const server = http.createServer()
+server.on('request', function(req, res) {
+  console.log('client requested')
+})
+server.listen(80, () => {
+    console.log('server running')
+})
+```
+
+req请求对象包含了与客户端相关的数据和属性
+
+```js
+server.on('request', function(req){
+	console.log(req.url, req.method)
+})
+```
+
+res响应对象包含了与服务器相关的数据和属性
+
+```js
+server.on('request', function(req, res) {
+  const {url, method} = req
+  res.setHeader('Content-Type', 'text/html;charset=utf-8') // 防止发送给客户端的内容乱码
+  res.end(`request end, request url is ${url}, and request method is ${method}`)
+})
+```
+
+## Node模块化
+
+模块:
+
+- 内置模块（只需要写名字）
+- 自定义模块（需要写路径）
+- 第三方模块（只需要写名字）
+
+模块具有模块作用域，内部变量在没有导出的情况下只能在模块作用域中使用。
+
+`require（）`方法加载其他模块的一瞬间，会执行模块中的代码。require引入的是`module.exports`导出的对象
+
+`module.exports`可以向外共享成员，默认情况下exports指向`module.exports`。如果给`module.exports`或exports赋值一个新对象，那么exports和`module.exports`就不是指向同一个对象了
+
+![](F:\Notes\node\imgs\exports and module.exports.png)
+
+**CommonJS规范**
+
+1. 每个模块内部，module对象代表当前模块
+2. module变量是一个对象，它的exports属性是对外的接口
+3. 加载某个模块就是加载该模块的`module.exports`属性
+
+**模块加载机制**
+
+1. 模块在第一次加载后被缓存，后面多次require不会重复执行代码
+2. *内置模块*加载优先级最高（require fs模块，优先加载内置fs模块，而不是第三方fs模块）
+3. 加载*自定义同名模块*不写扩展名，优先从js->json->node扩展名加载，都没有则加载失败
+4. 加载*第三方模块*会从`/node_modules`下加载第三方模块，没有则往上层查找，直到文件系统根目录
+5. *目录作为模块*
+   1. 在被加载的目录下查找`package.json`文件并寻找main属性作为`require（）`的入口
+   2. 在目录中没有`package.json`或main入口不存在，则node试图加载目录下的`index.js`
+   3. 以上两步都失败了则报`Error:cannot find module xxx`
+
+## 包与npm
+
+包的分类：
+
+- 项目包（安装到node_modules目录中）
+  - 开发依赖包（记录到devDependencies节点中的包）
+  - 核心依赖包（记录到dependencies节点中的包）
+- 全局包
+
+包的结构规范：
+
+- 包必须以单独目录存在
+- 包的顶级目录下必须包含`package.json`文件，且必须要有name、main、version这三个属性
+
+包版本`大版本.功能版本.bug修复版本`。
+
+`npm i 包全名@指定版本 -S/-D`下载第三方包。
+
+`npm uninstall 包全名`卸载第三方包
+
+`npm init -y`快速初始化项目并创建`pageage.json`文件
+
+`npm config get registry`获取下包的服务器地址
+
+`npm config set registry=https://registry.npm.taobao.org/` 切换淘宝镜像源
+
+**nrm镜像源管理工具**
+
+```bash
+npm i nrm -g // 全局下载nrm，存放在C:\Users\用户名\AppData\Roaming\npm\node_modules
+nrm ls // 查看nrm所有可用的镜像源
+nrm use taobao // 选择使用淘宝镜像
+```
+
+```json
+{
+  "name": "utils_zzz", // 包的名称，不可重复
+  "version": "1.0.0", // 包的版本号
+  "description": "提供常用工具类", // 包的描述信息
+  "main": "index.js", // 包的入口文件
+  "scripts": { 
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [], // 搜索关键字
+  "author": "", // 作者
+  "license": "ISC" // 开源许可协议
+}
+```
+
+**发布npm包**
+
+1. `npm login`登录npm
+2. `npm publish`发布npm包
+3. `npm unpublish 包名 --force`删除已发布的包（只能删除72小时内的包，删除过的包24小时内不能重复发布）

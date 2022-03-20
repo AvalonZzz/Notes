@@ -1,0 +1,340 @@
+<html>
+  <head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>i5ting_ztree_toc:node</title>
+		<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
+	  <style>
+		pre {
+		    counter-reset: line-numbering;
+		    border: solid 1px #d9d9d9;
+		    border-radius: 0;
+		    background: #fff;
+		    padding: 0;
+		    line-height: 23px;
+		    margin-bottom: 30px;
+		    white-space: pre;
+		    overflow-x: auto;
+		    word-break: inherit;
+		    word-wrap: inherit;
+		}
+
+		pre a::before {
+		  content: counter(line-numbering);
+		  counter-increment: line-numbering;
+		  padding-right: 1em; /* space after numbers */
+		  width: 25px;
+		  text-align: right;
+		  opacity: 0.7;
+		  display: inline-block;
+		  color: #aaa;
+		  background: #eee;
+		  margin-right: 16px;
+		  padding: 2px 10px;
+		  font-size: 13px;
+		  -webkit-touch-callout: none;
+		  -webkit-user-select: none;
+		  -khtml-user-select: none;
+		  -moz-user-select: none;
+		  -ms-user-select: none;
+		  user-select: none;
+		}
+
+		pre a:first-of-type::before {
+		  padding-top: 10px;
+		}
+
+		pre a:last-of-type::before {
+		  padding-bottom: 10px;
+		}
+
+		pre a:only-of-type::before {
+		  padding: 10px;
+		}
+
+		.highlight { background-color: #ffffcc } /* RIGHT */
+		</style>
+  </head>
+  <body>
+	  <div>
+				<div style='width:25%;'>
+						<ul id="tree" class="ztree" style='width:100%'>
+
+						</ul>
+				</div>
+        <div id='readme' style='width:70%;margin-left:20%;'>
+          	<article class='markdown-body'>
+            	<h2 id="node-js-">Node.js安装配置</h2>
+<p>下载稳定版本的包，安装</p>
+<pre><code class="lang-bash">path # 通过path命令查看PATH环境变量中是否有node的路径
+node -v # 查看node的版本号
+</code></pre>
+<h2 id="npm">NPM</h2>
+<p><code>npm -v</code>：查看npm版本号</p>
+<p><code>sudo npm install npm -g</code>：如果安装了旧版本的npm，可用来更新</p>
+<p><code>npm install -g cnpm --registry=https://registry.npmmirror.com</code>：下载淘宝镜像</p>
+<p><code>npm list -g</code>：查看所有全局安装的模块</p>
+<p><code>npm list 模块名</code>：查看某个模块的版本号</p>
+<p><code>npm uninstall 模块名</code>：卸载模块</p>
+<p><code>npm update 模块名</code>：更新模块</p>
+<h3 id="-">全局安装和本地安装</h3>
+<pre><code class="lang-bash">npm install express      # 本地安装
+npm install express -g   # 全局安装
+</code></pre>
+<p><strong>本地安装</strong></p>
+<ul>
+<li>安装包在./node_modules下，如果没有node_modules目录，会在当前执行npm命令的目录下生成node_modules目录</li>
+<li>可以通过<code>require()</code>来引入本地安装的包</li>
+</ul>
+<p><strong>全局安装</strong></p>
+<ul>
+<li>将安装包放在/usr/local下或者你node的安装目录</li>
+<li>可以在命令行里使用</li>
+</ul>
+<h3 id="-">版本号</h3>
+<p>npm语义版本号分为X.Y.Z三位，分别代表主版本号、次版本号和补丁版本号</p>
+<ul>
+<li>如果只是修复bug，需要更新Z位</li>
+<li>如果新增了功能，但向下兼容，需要更新Y位</li>
+<li>如果有大变动，向下不兼容，需要更新X位</li>
+</ul>
+<h3 id="-nvm">使用nvm</h3>
+<p>nvm:nodejs版本管理工具,可切换多个nodejs版本</p>
+<pre><code class="lang-bash">nvm list 查看当前所有的node版本
+nvm install v版本号 安装指定的版本
+nvm use --delete-prefix 版本号 切换到指定版本
+</code></pre>
+<h3 id="http-">http请求</h3>
+<ul>
+<li>DNS解析，建立TCP三次握手连接，发送http请求</li>
+<li>server接收到http请求，处理并返回</li>
+<li>客户端接收到返回数据，处理数据</li>
+</ul>
+<p>三次握手：</p>
+<ul>
+<li>第一次是客户端询问服务器你是否可以用</li>
+<li>第二次是服务器告诉客户端我可以使用</li>
+<li>第三次是客户端告诉服务器我接下来要使用了</li>
+</ul>
+<pre><code class="lang-js">const http = require(&#39;http&#39;)
+const querystring = require(&#39;querystring&#39;)
+const server = http.createServer((req,res) =&gt; {
+    // if(req.method === &#39;POST&#39;) {
+    //     console.log(&#39;content-type&#39;, req.headers[&#39;content-type&#39;])
+    //     let postData = &#39;&#39;
+    //     req.on(&#39;data&#39;, chunk =&gt; {
+    //         postData += chunk.toString()
+    //     })
+    //     req.on(&#39;end&#39;, () =&gt; {
+    //         console.log(postData)
+    //         res.end(&#39;hello world&#39;)
+    //     })
+    // }
+    const method = req.method
+    const url = req.url
+    const path = url.split(&#39;?&#39;)[0]
+    const query = querystring.parse(url.split(&#39;?&#39;)[1])
+    // 设置返回格式为JSON
+    res.setHeader(&#39;Content-type&#39;, &#39;application/json&#39;)
+    // 定义返回数据
+    const resData = {
+        method,
+        url,
+        path,
+        query,
+    }
+    if(method === &#39;GET&#39;) {
+        res.end(JSON.stringify(resData))
+    }
+    if(method === &#39;POST&#39;) {
+        let postData = &#39;&#39;
+        req.on(&#39;data&#39;, chunk =&gt; {
+            postData += chunk.toString()
+        })
+        req.on(&#39;end&#39;, () =&gt; {
+            resData.postData = postData
+            res.end(JSON.stringify(resData))
+        })
+    }
+})
+server.listen(8000)
+</code></pre>
+<h2 id="node-js-repl-">Node.js REPL(交互式解释器)</h2>
+<p>node交互式解释器，可以执行以下任务：</p>
+<ul>
+<li>读取：读取用户输入，解析输入的javascript数据结构并存在内存中</li>
+<li>执行：执行输入的数据结构</li>
+<li>打印：输出结果</li>
+<li>循环：循环操作以上步骤直到用户两次按下ctrl-c键退出</li>
+</ul>
+<p>Node REPL支持多行输入，Node会自动监测是否为连续的表达式</p>
+<p>可用下划线_来获取续航一个表达式的运算结果</p>
+<p><strong>REPL命令</strong></p>
+<ul>
+<li>ctrl-c：退出当前终端</li>
+<li>ctrl-c按下两次：退出Node REPL</li>
+<li>ctrl-d：退出NodeREPL</li>
+<li>向上/向下键：查看输入的历史命令</li>
+<li>tab键：列出当前命令</li>
+<li>.help：理出使用命令</li>
+<li>.break：退出多行表达式</li>
+<li>.clear：退出多行表达式</li>
+<li>.save filename：保存当前的Node REPL绘画到指定文件</li>
+<li>.load filename：载入当前Node REPL会话的文件内容</li>
+</ul>
+<h2 id="node-js-">Node.js回调函数</h2>
+<p>Node.js异步编程依托于回调来实现，但不能说使用了回调程序就异步化了</p>
+<h3 id="-">阻塞代码实例</h3>
+<pre><code class="lang-js">let fs = require(&#39;fs&#39;)
+let data = fs.readFileSync(&#39;input.txt&#39;)
+console.log(data.toString())
+console.log(&#39;程序执行结束&#39;)
+// 菜鸟教程官网地址：www.runoob.com
+// 程序执行结束!
+</code></pre>
+<h3 id="-">非阻塞代码实例</h3>
+<pre><code class="lang-js">var fs = require(&quot;fs&quot;);
+
+fs.readFile(&#39;input.txt&#39;, function (err, data) {
+    if (err) return console.error(err);
+    console.log(data.toString());
+});
+
+console.log(&quot;程序执行结束!&quot;);
+
+// 程序执行结束!
+// 菜鸟教程官网地址：www.runoob.com
+</code></pre>
+<h2 id="node-js-">Node.js事件循环</h2>
+<p>Node.js基本上所有的事件机制都是用观察者模式实现的。</p>
+<p>Node.js 单线程类似进入一个while(true)的事件循环，直到没有事件观察者退出，每个异步事件都生成一个事件观察者，如果有事件发生就调用该回调函数.</p>
+<pre><code class="lang-js">let events = require(&#39;events&#39;)
+// 创建eventEmitter对象
+let eventEmitter = new events.EventEmitter()
+// 绑定事件及其处理程序
+eventEmitter.on(&#39;eventName&#39;, eventHandler)
+// 触发事件
+eventEmitter.emit(&#39;eventName&#39;)
+</code></pre>
+<h2 id="fs-">fs文件系统模块</h2>
+<p><code>fs.readFile(path,[options],callback)</code></p>
+<pre><code class="lang-js">const fs = require(&#39;fs&#39;)
+fs.readFile(&#39;./11.txt&#39;, &#39;utf8&#39;, function(err,data){
+    console.log(err)
+    console.log(data)
+})
+</code></pre>
+<p><code>fs.writeFile(path,[options],callback)</code></p>
+<pre><code class="lang-js">const fs = require(&#39;fs&#39;)
+fs.writeFile(&#39;./1.txt&#39;, &#39;hello Node.js&#39;, function(err){
+    console.log(err)
+})
+</code></pre>
+<h2 id="path-">path路径模块</h2>
+<p><code>path.join([...paths])</code>将多个参数合并为一个路径</p>
+<pre><code class="lang-js">const path = require(&#39;path&#39;)
+console.log(path.join(&#39;/a&#39;, &#39;/b/c&#39;, &#39;../&#39;, &#39;/d&#39;)) // \a\b\d
+
+console.log(path.join(__dirname, &#39;/demo/1.txt&#39;)) //F:\node\path\demo\1.txt
+</code></pre>
+<p><code>path.basename(path[, ext])</code>获取路径中的最后一部分</p>
+<pre><code class="lang-js">const fpath = &#39;/a/b/c/index.html&#39;
+let fullName = path.basename(fpath)
+console.log(fullName) // index.html
+let nameWithoutExt = path.basename(fpath, &#39;.html&#39;)
+console.log(nameWithoutExt) // index
+</code></pre>
+<p><code>path.extname(path)</code>获取文件的扩展名</p>
+<pre><code class="lang-js">const filepath = &#39;/a/b/c/index.js&#39;
+const fext = path.extname(filepath)
+console.log(fext) // .js
+</code></pre>
+<h2 id="http-">Http模块</h2>
+<ol>
+<li>引入http模块</li>
+<li>调用<code>http.createServer()</code>创建服务器实例</li>
+<li>为服务器实例绑定request事件（只要有客户端请求服务器就会触发request事件）</li>
+<li>在服务器实例上调用<code>listen(端口号)</code>方法来启动服务器</li>
+</ol>
+<pre><code class="lang-js">const http = require(&#39;http&#39;)
+const server = http.createServer()
+server.on(&#39;request&#39;, function(req, res) {
+  console.log(&#39;client requested&#39;)
+})
+server.listen(80, () =&gt; {
+    console.log(&#39;server running&#39;)
+})
+</code></pre>
+<p>req请求对象包含了与客户端相关的数据和属性</p>
+<pre><code class="lang-js">server.on(&#39;request&#39;, function(req){
+    console.log(req.url, req.method)
+})
+</code></pre>
+<p>res响应对象包含了与服务器相关的数据和属性</p>
+<pre><code class="lang-js">server.on(&#39;request&#39;, function(req, res) {
+  const {url, method} = req
+  res.setHeader(&#39;Content-Type&#39;, &#39;text/html;charset=utf-8&#39;) // 防止发送给客户端的内容乱码
+  res.end(`request end, request url is ${url}, and request method is ${method}`)
+})
+</code></pre>
+<h2 id="node-">Node模块化</h2>
+<p>模块:</p>
+<ul>
+<li>内置模块（只需要写名字）</li>
+<li>自定义模块（需要写路径）</li>
+<li>第三方模块（只需要写名字）</li>
+</ul>
+<p>模块具有模块作用域，内部变量在没有导出的情况下只能在模块作用域中使用。</p>
+<p><code>require（）</code>方法加载其他模块的一瞬间，会执行模块中的代码。require引入的是<code>module.exports</code>导出的对象</p>
+<p><code>module.exports</code>可以向外共享成员，默认情况下exports指向<code>module.exports</code>。如果给<code>module.exports</code>或exports赋值一个新对象，那么exports和<code>module.exports</code>就不是指向同一个对象了</p>
+<p><img src="F:\Notes\node\imgs\exports and module.exports.png" alt=""></p>
+<p><strong>CommonJS规范</strong></p>
+<ol>
+<li>每个模块内部，module对象代表当前模块</li>
+<li>module变量是一个对象，它的exports属性是对外的接口</li>
+<li>加载某个模块就是加载该模块的<code>module.exports</code>属性</li>
+</ol>
+<h2 id="-npm">包与npm</h2>
+<p>包的分类：</p>
+<ul>
+<li>项目包（安装到node_modules目录中）<ul>
+<li>开发依赖包（记录到devDependencies节点中的包）</li>
+<li>核心依赖包（记录到dependencies节点中的包）</li>
+</ul>
+</li>
+<li>全局包</li>
+</ul>
+<p>包版本<code>大版本.功能版本.bug修复版本</code>。</p>
+<p><code>npm i 包全名@指定版本 -S/-D</code>下载第三方包。</p>
+<p><code>npm uninstall 包全名</code>卸载第三方包</p>
+<p><code>npm init -y</code>快速初始化项目并创建<code>pageage.json</code>文件</p>
+<p><code>npm config get registry</code>获取下包的服务器地址</p>
+<p><code>npm config set registry=https://registry.npm.taobao.org/</code> 切换淘宝镜像源</p>
+<p><strong>nrm镜像源管理工具</strong></p>
+<pre><code class="lang-bash">npm i nrm -g // 全局下载nrm，存放在C:\Users\用户名\AppData\Roaming\npm\node_modules
+nrm ls // 查看nrm所有可用的镜像源
+nrm use taobao // 选择使用淘宝镜像
+</code></pre>
+
+          	</article>
+        </div>
+		</div>
+  </body>
+</html>
+<script type="text/javascript" src="toc/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="toc/js/ztree_toc.js"></script>
+<script type="text/javascript" src="toc_conf.js"></script>
+
+<SCRIPT type="text/javascript" >
+<!--
+$(document).ready(function(){
+    var css_conf = eval(markdown_panel_style);
+    $('#readme').css(css_conf)
+    
+    var conf = eval(jquery_ztree_toc_opts);
+		$('#tree').ztree_toc(conf);
+});
+//-->
+</SCRIPT>
