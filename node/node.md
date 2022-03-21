@@ -288,7 +288,7 @@ server.on('request', function(req, res) {
 
 `module.exports`可以向外共享成员，默认情况下exports指向`module.exports`。如果给`module.exports`或exports赋值一个新对象，那么exports和`module.exports`就不是指向同一个对象了
 
-![](F:\Notes\node\imgs\exports and module.exports.png)
+![](D:\Notes\node\imgs\exports and module.exports.png)
 
 **CommonJS规范**
 
@@ -444,7 +444,7 @@ app.METHOD(PATH, HANDLER)
 
 当一个请求到达Express服务器之后，可以连续调用多个中间件，从而对这次请求进行预处理
 
-![](F:\Notes\node\imgs\middleware.png)
+![](D:\Notes\node\imgs\middleware.png)*
 
 中间件本质是一个function处理函数，形参列表中必须要有next参数
 
