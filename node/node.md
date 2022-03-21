@@ -361,3 +361,239 @@ nrm use taobao // 选择使用淘宝镜像
 1. `npm login`登录npm
 2. `npm publish`发布npm包
 3. `npm unpublish 包名 --force`删除已发布的包（只能删除72小时内的包，删除过的包24小时内不能重复发布）
+
+## Express
+
+### 创建基本服务器
+
+```js
+// 创建基本的Express服务器
+// 导入express
+const express = require('express')
+// 创建web服务器
+const app = express()
+// 调用app.listen(端口号，成功回调)启动服务器
+app.listen(80, () => {
+	console.log('express server running')
+})
+```
+
+**express监听get请求**
+
+`app.get('url/:动态参数', function(req, res) {/*处理函数*/})`携带参数在`req.query`中，动态参数在`req.params`中
+
+**express监听post请求**
+
+`app.post('url/:动态参数',function(req, res) {/*处理函数*/})`动态参数在`req.params`中
+
+**express把内容响应给客户端**
+
+`res.send(返回数据)`
+
+```js
+app.get('/user',(req, res) => {
+	res.send({name: 'zzz', age: 20, gender: '男'})
+})
+app.post('/user', (req, res) => {
+	res.send('请求成功')
+})
+```
+
+**托管静态资源**
+
+`app.use('路径前缀', express.static('目录名'))`可将指定目录名创建静态资源服务器，存放静态资源的目录名不会出现在url中
+
+多次调用会创建多个静态资源目录，根据调用`express.static()`的顺序查找资源 
+
+```js
+// 导入express
+const express = require('express')
+// 创建web服务器
+const app = express()
+// 将public文件夹作为静态资源目录
+app.use(express.static('/public'))
+```
+
+### 路由
+
+路由就是映射关系
+
+在Express中路由就是客户端请求和服务器处理函数之间的映射关系
+
+Express的路由由请求类型、请求URL地址和处理函数组成
+
+```js
+app.METHOD(PATH, HANDLER)
+```
+
+路由匹配过程：会按照路由定义的顺序去查找，只有在METHOD和PATH都对应上时才会去执行对应的处理函数
+
+**路由模块化**
+
+为了方便管理路由，Express不建议直接将路由挂载到app上，而是将路由抽离为单独的模块
+
+步骤：
+
+1. 创建路由模块对应的js文件
+2. 调用`express.Router()`函数创建路由对象
+3. 向路由对象是哪个挂在具体的路由
+4. 使用`module.exports`向外共性路由对象
+5. 使用`app.use('路由前缀', 路由对象)`函数注册路由模块
+
+### 中间件
+
+当一个请求到达Express服务器之后，可以连续调用多个中间件，从而对这次请求进行预处理
+
+![](F:\Notes\node\imgs\middleware.png)
+
+中间件本质是一个function处理函数，形参列表中必须要有next参数
+
+```js
+// 路由处理函数
+app.get('/',(req,res) => {})
+// 中间件
+app.get('/',(req,res,next) => {next()})
+```
+
+`app.use(中间件函数)`即可定义一个全局生效的中间件。**中间件注册必须在路由注册之前**
+
+```js
+const mw = function (req,res,next){
+  console.log(111)
+  next()
+}
+app.use(mw)
+```
+
+局部中间件是在路由的第二个参数中定义的
+
+```js
+const mw1 = function (req,res,next){
+  console.log(111)
+  next()
+}
+const mw2 = function (req,res,next){
+  console.log(222)
+  next()
+}
+app.get('/', [wm1, wm2], function(req,res){})
+```
+
+**中间件的分类**
+
+应用级别的中间件，即绑定到app实例上的中间件
+
+```js
+// 应用级别全局中间件
+app.use((req,res,next)=>{next()})
+// 应用级别局部中间件
+app.get('/', mw, (req,res) => {})
+```
+
+路由级别的中间件，即绑定到路由对象上的中间件。用法和应用级别的一样
+
+```js
+const router = express.Router()
+router.use(function(req,res,next){
+	next()
+})
+```
+
+错误级别的中间件，用来捕获整个项目中发生的错误，中间件函数有4个参数，分别是err、req、res和next
+
+```js
+app.get('/', function(req,res){
+	throw new Error('服务器发生了错误')
+	res.send('Home Page')
+})
+app.use(function(err, req, res, next) {
+	console.log('发生了错误'+err.message)
+	res.send('Error'+err.message)
+})
+```
+
+内置中间件
+
+- `express.static`
+- `express.json`解析JSON格式的请求体数据,必须在注册路由中间件之前注册
+- `express.unlencoded`解析URL-encoded格式的请求体数据，必须在注册路由中间件之前注册
+
+```js
+// 解析配置application/json格式数据的内置中间件
+app.use(express.json())
+// 配置解析application/x-www-form-urlencoded格式数据的内置中间件
+app。use(express.urlencoded({extended: false}))
+```
+
+第三方中间件
+
+```js
+const bodyParser = require('body-parser')
+app.use(bodyParser)
+```
+
+**解决跨域问题**
+
+1. CORS
+2. JSONP（只支持GET请求）
+
+```js
+// CORS
+// 1. 运行npm i cors安装中间件
+// 2. 使用const cors = require('cors')导入中间件
+// 3. 在路由之前调用app.use(cors())配置中间件
+const cors = require('cors')
+app.use(cors())
+```
+
+CORS响应头
+
+Access-Control-Allow-Origin: 具体域名 | *
+
+```js
+res.setHeader('Access-Control-Allow-Origin', '*')
+```
+
+Access-Control-Allow-Headers: 默认情况下CORS只支持客户端向服务器发送9个请求头条Accept、Accept-Language、Content-Language、DPR、Downlink、Save-Data、Viewport-Width、Width、Content-Type（值仅限于text/plain、multipart/form-data、application/x-www-form-urlencoded三者之一）。如果超过这9个则需要在Access-Control-Allow-Headers中配置额外的请求头
+
+```js
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type', 'X-Custom-Type')
+```
+
+Access-Control-Allow-Methods: 默认情况下CORS只支持客户端发起GET、POST、HEAD请求，如果客户端希望通过PUT、DELETE等方式发送请求，则需要Access-Control-Allow-Methods配置
+
+```js
+res.setHeaders('Access-Control-Allow-Methods', 'POST, GET, PUT, HEAD')
+res.setHeaders('Access-Control-Allow-Methods', '*')
+```
+
+跨域请求分类：
+
+- 简单请求：没有设置Access-Control-Allow-Methods和Access-Control-Allow-Heads
+- 预检请求：设置了Access-Control-Allow-Methods或Access-Control-Allow-Heads，或者向服务器发送了application/json格式的数据
+
+在浏览器和服务器正式通信之前，浏览器会先发送OPTION请求进行预检，以获知服务器是否允许该实际请求，这次OPTION请求成为“预检请求”。服务器响应了预检请求才会发送真正的请求
+
+JSONP
+
+JSONP是通过script的src属性请求服务器上的数据，它不是一个Ajax请求，只支持GET请求。
+
+如果项目已配置CORS，则需要在配置CORS中间件之前声明JSONP接口，否则JSONP接口会被处理成CORS接口
+
+```js
+// 实现步骤
+// 1. 获取客户端发送过来的回调函数名字
+// 2. 得到想通过JSONP形式发送给客户端的数据
+// 3. 根据前两步得到的数据，拼接成一个函数调用的字符串
+// 4. 把上一步拼接得到的字符串，响应给<script>标签解析执行
+app.get('/api/jsonp',(req,res)=>{
+    const funcName = req.query.callback
+    const data = {name: 'zzz'm age: 22}
+    const scriptStr = `${funcName}(${JSON.stringify(data)})`
+    res.send(scriptStr)
+})
+```
+
+## 数据库
+
+传统型数据库（关系型数据库）的组织结构分为数据库（database）、数据表（table）、数据行（row）、字段（field）这4部分组成
