@@ -597,3 +597,103 @@ app.get('/api/jsonp',(req,res)=>{
 ## 数据库
 
 传统型数据库（关系型数据库）的组织结构分为数据库（database）、数据表（table）、数据行（row）、字段（field）这4部分组成
+
+**字段特殊标识**
+
+1. PK（Primary Key)主键、唯一标识
+2. NN（Not Null）值不允许为空
+3. UQ（Unique）值唯一
+4. AI（Auto Increment）值自动增长
+
+### SQL语法
+
+注释：`--`用两个短横线定义
+
+#### SELECT语句
+
+```sql
+-- 从FROM指定的表中，查询出所有的数据
+SELECT * FROM 表名称
+-- 从FROM指定的表中，查询出指定列名称的数据
+SELECT 列名称[, 列名称] FROM 表名称
+```
+
+#### INSERT INTO语句
+
+```sql
+-- 向指定的表中，插入如下几列数据，列的值通过values一一指定
+INSERT INTO table_name(列1, 列2, ...) VALUES(值1, 值2, ...)
+```
+
+#### UPDATE语句
+
+```sql
+-- 用UPDATE指定要更新那个表中的数据
+-- 用SET指定列对应的新值
+-- 用WHERE指定更新的条件
+UPDATE 表名称 SET 列名称 = 新值[, 列名称 = 新值] WHERE 列名称 = 某值
+```
+
+#### DELETE语句
+
+```sql
+-- 从指定的表中，根据WHERE条件，删除对应的数据行
+DELETE FROM 表名称 WHERE 列名称 = 值
+```
+
+#### WHERE子句
+
+WHERE子句用于限定选择的标准，在SELECT、UPDATE、DELETE语句中都可以用WHERE子句来限定选择标准
+
+```SQL
+SELECT 列名称 FROM 表名称 WHERE 列 运算符 值
+UPDATE 表名称 SET 列 = 新值 WHERE 列 运算符 值
+DELETE FROM 表名称 WHERE 列 运算符 值
+```
+
+#### AND和OR运算符
+
+AND和OR可在WHERE子句中把多个条件结合起来
+
+AND表示必须同时满足多个条件，相当于&&运算符
+
+OR表示满足一个条件即可，相当于||运算符
+
+```SQL
+SELECT * FROM users WHERE id < 3 AND status = 0
+SELECT * FROM users WHERE status = 1 OR username = 'zcw'
+```
+
+#### ORDER BY子句
+
+ORDER BY语句用于排序
+
+ORDER BY语句默认按照升序排列，即ASC，如果希望降序可使用DESC关键字
+
+```sql
+SELECT * FROM users ORDER BY status
+-- 下面这条语句等价于上面这条
+SELECT * FROM users ORDER BY status ASC 
+
+SELECT * FROM users ORDER BY status DESC
+-- 多重排序，先按照status降序再按照username升序
+SELECT * FROM users ORDER BY status DESC, username ASC
+```
+
+#### COUNT(*)函数
+
+COUNT(*)函数用于返回查询结果的总数据条数
+
+```sql
+SELECT COUNT(*) FROM users WHERE status = 0
+```
+
+#### AS关键字
+
+AS关键字用于给查询出来的列名称起别名
+
+```sql
+SELECT COUNT(*) AS total FROM users WHERE status = 0
+SELECT username AS name,password AS pw FROM users WHERE status = 0
+```
+
