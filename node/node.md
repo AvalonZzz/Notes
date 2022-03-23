@@ -697,3 +697,223 @@ SELECT COUNT(*) AS total FROM users WHERE status = 0
 SELECT username AS name,password AS pw FROM users WHERE status = 0
 ```
 
+## mysql模块
+
+```js
+const mysql = require('mysql')
+// 建立与MySQL数据库的连接
+const db = mysql.createPool({
+	host: '127.0.0.1', // 数据库的IP地址
+	user: 'root', // 登录数据库的账号
+	password: 'q7240insbwgia', // 登录数据库的密码
+	database: 'my_db_01' // 指定要操作哪个数据库
+})
+```
+
+**查询**数据
+
+```js
+db.query('sql语句', (err, results) => {
+	if (err) return console.log(err.message)
+    // 如果执行的sql语句是select则结果是一个Array
+	console.log(results)
+})
+```
+
+**插入数据**
+
+```JS
+const user = {username: 'spider-man', password: 'pcc321'}
+// 待执行的sql语句，英文的?表示占位符
+const sqlStr = 'INSERT INTO users (username, password) VALUES (?, ?)'
+// 使用数组的形式，依次为?占位符指定具体的值
+db.query(sqlStr, [user.username, user.password], (err, results) => {
+    if(err) return console.log(err.message)
+    // results 数据结构
+    // OkPacket {
+    //     fieldCount: 0,
+    //     affectedRows: 1,
+    //     insertId: 8,
+    //     serverStatus: 2,
+    //     warningCount: 0,
+    //     message: '',
+    //     protocol41: true,
+    //     changedRows: 0
+    // }
+    if (result.affectedRows === 1) {
+        console.log('数据插入成功')
+    }
+})
+```
+
+如果数据表中要插入的字段很多，像上面那种写法一个个对应插入很麻烦，可以用以下简写
+
+```js
+const user = {username: 'spider-man', password: 'pcc321'}
+// 待执行的sql语句，英文的?表示占位符
+const sqlStr = 'INSERT INTO users SET ?'
+db.query(sqlStr, user, (err, results) => {
+    if(err) return console.log(err.message)
+    if (result.affectedRows === 1) {
+        console.log('数据插入成功')
+    }
+})
+```
+
+**更新数据**
+
+```js
+const user = {id: 8, username: 'iron-man1', password: 'avalonzzz'}
+const sqlStr = 'UPDATE users SET username=?,password=? WHERE id=?'
+db.query(sqlStr, [user.username, user.password, user.id], (err, results) => {
+    if(err) return console.log(err.message)
+    if(results.affectedRows === 1){
+        console.log(results, '数据库更新成功')
+    }
+})
+```
+
+简写形式
+
+```js
+const user = {id: 8, username: 'iron-man2', password: 'avalonzzzz'}
+const sqlStr = 'UPDATE users SET ? WHERE id = ?'
+db.query(sqlStr, [user, user.id], (err, results) => {
+    if(err) return console.log(err.message)
+    if(results.affectedRows === 1){
+        console.log(results, '数据库更新成功')
+    }
+})
+```
+
+## Session原理
+
+http请求是无状态的，可用cookie突破这个限制
+
+cookie是存储在浏览器中不超过4kb的字符串，不同域名下的cookie各自独立。客户端发送请求时会把当前域名下的未过期的cookie都发送给服务器
+
+因为cookie不具备安全性，所以需要采用服务端session认证的操作
+
+![](D:\Notes\node\imgs\session.png)
+
+```js
+// 使用express-session npm i express-session
+const express = require('express')
+const session = require('express-session')
+const app = express()
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true
+}))
+```
+
+将express-session配置成功后，可通过req.session访问和使用session
+
+```js
+app.post('/api/login', (req, res) => {
+	if(req.body.username !== 'admin' || req.body.password !== '000000'){
+		return res.send({status: 1, msg: '登录失败'})
+	}
+	req.session.user = req.body // 将用户的信息存储到session中
+    req.session.isLogin = true // 将用户的登录状态存储到session中
+    res.send({status: 0, msg: '登录成功'})
+})
+```
+
+获取session
+
+```js
+app.get('/api/username', (req,res) => {
+	if(req.session.iislogin) {
+		return res.send({status: 1, msg: 'fail'})
+	}
+    res.send({
+        status: 0,
+        msg: 'success',
+        username: req.session.user.username
+    })
+})
+```
+
+清空session（当用户登出的时候）
+
+```js
+app.post('/api/logout', (req, res) => {
+	req.session.destroy()
+	res.send({
+		status: 0,
+		msg: '退出登录成功'
+	})
+})
+```
+
+## JWT
+
+session认证机制需要cookie配置，cookie不支持跨域，需要配置很多才能实现，所以麻烦。
+
+JWT（JSON Web Token）是目前最流行的跨域认证解决方案
+
+![](D:\Notes\node\imgs\JWT.png)
+
+JWT有Header（头部）、Payload（有效荷载）、Signature（签名）组成。三者之间用英文的`.`分隔，Payload才是用户的真正信息
+
+JWT使用方式：在服务端返回JWT之后，将其存在localStroage或sessionStorage中，请求的时候将其放在HTTP的Authorization字段中
+
+```http
+Authorization: Bearer <token>
+```
+
+**安装JWT**
+
+jsonwebtoken：用于生成JWT字符串
+
+express-jwt：用户将JWT字符串解析还原成JSON对象
+
+```bash
+npm i jsonwebtoken express-jwt
+```
+
+在使用这两个包时，需要顶一个secret秘钥，用于加密和解密JWT字符串
+
+```js
+const express = require('express')
+const jwt = require('jsonwebtoken')
+const expressJWT = require('express-jwt')
+const app = express()
+const secretKey = 'AvalonZzz'
+// 登录接口
+app.post('/api/login', (req, res) => {
+    // ... 判断用户认证是否正确
+    res.send({
+        status: 200,
+        message: '登录成功',
+        // 调用jwt.sign()生成JWT字符串，三个参数分别是用户信息、加密秘钥、配置对象
+        token: jwt.sign({username: userinfo.username}, secretKey, {expiresIn: '30s'})
+    })
+})
+// 使用app.user()来注册中间件
+// expressJWT({secret: secretKey}) 配置解析Token的中间件
+// .unless({path: [/^\/api//]}) 用来指定哪些接口不需要访问权限
+app.use(expressJWT({secret: secretKey}).unless({path: [/^\/api//]}))
+app.get('/admin/getinfo', (req,res) => {
+    console.log(req.user) // 可通过req.user对象来访问JWT解析出来的用户信息了
+    res.send({
+        status: 200,
+        message: '请求成功',
+        data: req.user
+    })
+})
+```
+
+捕获解析JWT失败产生的错误
+
+```js
+app.use((err, req, res, next) => {
+	if(err.name === 'UnauthorizedError') {
+		return res.send({status: 401, message: '无效的Token'})
+	}
+	res.send({status: 500, message: '未知错误'})
+})
+```
+
