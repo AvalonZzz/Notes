@@ -614,5 +614,195 @@ module.exports = {
 };
 ```
 
+## 模块解析
 
+webpack能解析三种文件路径
+
+- 绝对路径
+- 相对路径
+- 模块路径
+
+可以通过`resolve.alias`来自定义模块的别名
+
+```js
+const path = require('path')
+module.exports = {
+	// ...
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, './src')
+		}
+	}
+}
+```
+
+如果同一目录下有相同文件名不同扩展名的文件，引入时可以通过配置扩展名的优先级来决定导入什么文件
+
+```js
+// add.js add.json add.vue通过下面配置会先导入配置数组最前面的扩展名文件
+module.exports = {
+	resolve: {
+		extensions: ['.js', '.json', '.vue']
+	}
+}
+```
+
+## externals外部扩展
+
+**第一种方式：手动配置外部扩展**
+
+1. 创建html模板，并在里面导入外部扩展
+2. 在`HtmlWebpackPlugin`插件中配置html模板
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script>
+</head>
+<body>
+</body>
+</html>
+```
+
+```js
+module.exports = {
+	// ...
+	plugins: [
+		new HtmlWebpackPlugin({template: './index.html'})
+	],
+     externals: {
+         jquery: 'jQuery',
+     },
+}
+```
+
+**第二种方式：自动配置外部扩展**
+
+只需要在externals选项中配置的外部扩展改为数组，数组第一个元素是cdn链接，第二个元素是扩展别名
+
+```js
+module.exports = {
+	// ...
+	plugins: [
+		new HtmlWebpackPlugin()
+	],
+    externalsType: 'script',
+    externals: {
+        jquery: [
+  	    	'https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js', // 配置cdn地址
+      		'jQuery', // 配置外部扩展别名
+        ]
+    },
+}
+```
+
+## 依赖图
+
+首先安装`webpack-bundle-analyzer`
+
+```bash
+npm i webpack-bundle-analyzer -D
+```
+
+然后添加webpack插件配置
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
+module.exports = {
+  entry: {
+    app: './src/app.js',
+    app2: './src/app2.js',
+  },
+  mode: 'development',
+  plugins: [new HtmlWebpackPlugin(), new BundleAnalyzerPlugin()],
+};
+```
+
+## PostCSS与CSS模块
+
+首先安装`style-loader  css-loader postcss-loader`
+
+```bash
+npm i style-loader css-loader postcss-loader -D
+```
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: 'development',
+  entry: './src/app.js',
+  plugins: [new HtmlWebpackPlugin()],
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          { loader: 'css-loader', options: { modules: true } }, // 开启css模块模式
+          'postcss-loader',
+        ],
+      },
+    ],
+  },
+};
+```
+
+然后安装`autoprefixer`
+
+```bash
+npm i autofixer -D
+```
+
+然后创建`postcss.config.js`来配置css插件，并且配置`package.json`的`browserslist`
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: [require('autoprefixer')],
+};
+// package.json
+"browserslist": [
+  "> 1%",
+  "last 2 versions"
+]
+```
+
+## typescript
+
+首先安装`typescript`和`ts-loader`
+
+```bash
+npm i typescript ts-loader -D
+```
+
+然后配置ts的loader
+
+```js
+ module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  resolve: {
+    extensions: ['ts', 'js'],
+  },
+```
+
+然后创建ts的config文件
+
+```bash
+npx tsc --init
+```
 
