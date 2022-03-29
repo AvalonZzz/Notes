@@ -806,3 +806,116 @@ npm i typescript ts-loader -D
 npx tsc --init
 ```
 
+## 多页面应用
+
+```js
+module.exports = {
+	entry: './src/app.js'
+}
+// 等同于以下写法
+module.exports = {
+	entry: {
+		main: './src/app.js'
+	}
+}
+```
+
+多入口配置
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: 'development',
+  entry: {
+    main: {
+      import: ['./src/app.js', './src/app2.js'],
+      dependOn: 'lodash',
+    },
+    main2: {
+      import: './src/app3.js',
+      dependOn: 'lodash',
+    },
+    lodash: 'lodash',
+  },
+  plugins: [new HtmlWebpackPlugin()],
+};
+```
+
+多页面环境配置
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: 'development',
+  entry: {
+    main: {
+      import: ['./src/app.js', './src/app2.js'],
+      dependOn: 'lodash',
+      filename: 'chanel1/[name].js', // 定义入口文件打包后的未知
+    },
+    main2: {
+      import: './src/app3.js',
+      dependOn: 'lodash',
+      filename: 'chanel2/[name].js', // 定义入口文件打包后的未知
+    },
+    lodash: 'lodash',
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './index.html',
+      title: '多页面应用',
+      inject: 'body',
+      filename: 'chanel1/index.html', // index1模板打包后的模板路径
+      chunks: ['main', 'lodash'], // index模板中script标签要引入的入口文件
+      publicPath: 'http://www.a.com', // 配置index页面模板的公共路径
+    }),
+    new HtmlWebpackPlugin({
+      template: './index2.html',
+      inject: 'body',
+      filename: 'chanel2/index2.html', // index2模板打包后的模板路径
+      chunks: ['main2', 'lodash'], // index2模板中script标签要引入的入口文件
+      publicPath: 'http://www.b.com', // 配置index2页面模板的公共路径
+    }),
+  ],
+  output: {
+    clean: true,
+  },
+};
+
+```
+
+## Tree Shaking
+
+tree shaking会将项目中的未引用的代码删除（第三方的包只引用未使用还是会打包进去的）
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: 'production',
+  entry: './src/app.js',
+  // devtool: 'inline-source-map',
+  plugins: [new HtmlWebpackPlugin()],
+  optimization: {
+    usedExports: true, // 在开发环境下只会提示一个unused harmony export minus，在生产环境下会将没有引用的代码删除
+  },
+};
+```
+
+在`package.json`中配置sideEffects，有三种值
+
+- true：所有文件都有副作用，所以不会进行tree-shaking
+- false：所有文件都没有副作用，所有会进行tree-shaking
+- 数组：告诉webpack，除了数组中的文件，其他都可以进行tree-shaking
+
+```js
+// package.json
+{
+	"sideEffects": ["*.css"],
+}
+```
+
+
+
