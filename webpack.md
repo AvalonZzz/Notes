@@ -917,5 +917,79 @@ module.exports = {
 }
 ```
 
+## @babel/polyfill
 
+polyfill能将es6的语法转化成es5或更低版本的语法
+
+首先安装`polyfill`
+
+```bash
+npm i @babel/polyfill -D
+```
+
+```js
+// index.js
+import '@babel/polyfill'
+console.log(Array.from(1, 2, 3), (x) => x + x);
+```
+
+像上面那样在入口文件中引入polyfill会造成引入不必要的代码，打包体积大
+
+通过webpack去配置polyfill
+
+```bash
+npm i babel-loader @babel/core @babel/preset-env core-js@3 -D
+```
+
+```js
+module.exports = {
+  mode: 'development',
+  entry: './src/index.js',
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env', // 加载了preset-env之后就不需要再手动去引入polyfill了
+                {
+                  targets: ['last 1 version', '> 1%'],
+                  useBuiltIns: 'usage',
+                  corejs: 3,
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+  },
+};
+
+```
+
+通过webpack的方式去使用polyfill就不用全局去引入polyfill，且打包体积小
+
+## 构建library
+
+```js
+const path = require('path');
+module.exports = {
+  mode: 'production',
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'myLib.js',
+    library: {
+      name: 'myLib',
+      type: 'umd', // 值为window（script标签使用），commonjs，module（esmodule），umd（三者都可以）
+    },
+    globalObject: 'globalThis', // 仅在umd下使用，指定一个全局的this
+  },
+};
+```
 
